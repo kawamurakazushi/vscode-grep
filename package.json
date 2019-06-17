@@ -2,7 +2,7 @@
   "name": "vscode-grep",
   "displayName": "vscode-grep",
   "description": "",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "kawamurakazushi",
   "engines": {
     "vscode": "^1.35.0"
@@ -20,7 +20,18 @@
         "command": "grep.git",
         "title": "Grep: Git"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "vscode-grep Configuration",
+      "properties": {
+        "grep.git.preview": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable / Disable preview when the item is selected."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",

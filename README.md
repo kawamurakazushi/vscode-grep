@@ -2,7 +2,7 @@
 
 ## Features
 
-Grep extension for Visual Studio Code.
+Incremental grep extension for Visual Studio Code.
 
 ## Git Grep (grep.git)
 
@@ -10,7 +10,9 @@ Grep extension for Visual Studio Code.
 
 ## Extension Settings
 
---
+| Setting          | Description                                         | Type    | Default Value |
+| ---------------- | --------------------------------------------------- | ------- | ------------- |
+| grep.git.preview | Enable / Disable preview when the item is selected. | boolean | false         |
 
 ## Commands
 
@@ -26,7 +28,7 @@ Grep extension for Visual Studio Code.
 ## Project Roadmap
 
 - [x] git grep
-- [ ] git grep - preview mode
+- [x] git grep - preview mode
 - [ ] git grep - regex
 - [ ] ability to configure grep algorithm (ex: ag)
 - [ ] grep buffer (open editors)

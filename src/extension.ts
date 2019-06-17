@@ -9,16 +9,18 @@ import {
   Selection,
   Position,
   Range,
-  TextEditorRevealType
+  TextEditorRevealType,
+  TextDocumentShowOptions
 } from "vscode";
 
 const projectRoot = workspace.rootPath ? workspace.rootPath : ".";
 
-const fetchItems = (query: string): Promise<QuickPickItem[]> => {
+const gitGrep = (query: string): Promise<QuickPickItem[]> => {
   const command = quote([
     "git",
     "grep",
     "-H",
+    "--cached",
     "-n",
     "-i",
     "-I",
@@ -26,7 +28,7 @@ const fetchItems = (query: string): Promise<QuickPickItem[]> => {
     query === "" ? " " : query
   ]);
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _) => {
     exec(
       command,
       { cwd: projectRoot, maxBuffer: 2000 * 1024 },
@@ -51,8 +53,8 @@ const fetchItems = (query: string): Promise<QuickPickItem[]> => {
             const path = fullPath.split("/");
             return {
               label: `${path[path.length - 1]} : ${line}`,
-              description: desc.join(":"),
-              detail: fullPath
+              detail: desc.join(":").trim(),
+              description: fullPath
             };
           })
         );
@@ -61,37 +63,47 @@ const fetchItems = (query: string): Promise<QuickPickItem[]> => {
   });
 };
 
+const showDocument = async (item: QuickPickItem, preserveFocus = false) => {
+  const path = item.description;
+  const [_, line] = item.label.split(" : ");
+
+  const doc = await workspace.openTextDocument(projectRoot + "/" + path);
+  const options: TextDocumentShowOptions = { preserveFocus: preserveFocus };
+  await window.showTextDocument(doc, options);
+
+  const activeTextEditor = window.activeTextEditor;
+
+  if (activeTextEditor) {
+    const pos = new Position(~~line - 1, 0);
+    const range = new Range(pos, pos);
+    activeTextEditor.selection = new Selection(pos, pos);
+    activeTextEditor.revealRange(range, TextEditorRevealType.InCenter);
+  }
+};
+
 export function activate(context: ExtensionContext) {
   let disposable = commands.registerCommand("grep.git", async () => {
     const quickPick = window.createQuickPick();
-    quickPick.matchOnDescription = true;
+    quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = true;
-    quickPick.items = await fetchItems("");
+    quickPick.placeholder = "Search";
+    quickPick.items = await gitGrep("");
 
     quickPick.onDidAccept(async () => {
       if (quickPick.selectedItems.length > 0) {
-        const path = quickPick.selectedItems[0].detail;
-        const [_, line] = quickPick.selectedItems[0].label.split(" : ");
-
-        const doc = await workspace.openTextDocument(projectRoot + "/" + path);
-        await window.showTextDocument(doc);
-
-        const activeTextEditor = window.activeTextEditor;
-
-        if (activeTextEditor) {
-          const pos = new Position(~~line - 1, 0);
-          const range = new Range(pos, pos);
-          activeTextEditor.selection = new Selection(pos, pos);
-          activeTextEditor.revealRange(range, TextEditorRevealType.InCenter);
-        }
+        await showDocument(quickPick.selectedItems[0]);
       }
     });
 
-    quickPick.onDidChangeValue(async val => {
-      quickPick.items = await fetchItems(val);
+    quickPick.onDidChangeActive(async val => {
+      const config = workspace.getConfiguration("grep");
+      const preview = config.git.preview;
+      if (preview) {
+        if (val.length > 0) {
+          showDocument(val[0], true);
+        }
+      }
     });
-
-    quickPick.placeholder = "Search";
 
     quickPick.show();
   });
@@ -99,5 +111,4 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {}
