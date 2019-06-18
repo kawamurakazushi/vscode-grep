@@ -10,9 +10,9 @@ Incremental grep extension for Visual Studio Code.
 
 ## Extension Settings
 
-| Setting          | Description                                         | Type    | Default Value |
-| ---------------- | --------------------------------------------------- | ------- | ------------- |
-| grep.git.preview | Enable / Disable preview when the item is selected. | boolean | false         |
+| Setting            | Description                                         | Type    | Default Value |
+| ------------------ | --------------------------------------------------- | ------- | ------------- |
+| `grep.git.preview` | Enable / Disable preview when the item is selected. | boolean | false         |
 
 ## Commands
 
