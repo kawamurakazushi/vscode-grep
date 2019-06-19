@@ -30,8 +30,6 @@ Incremental grep extension for Visual Studio Code.
 - [x] git grep
 - [x] git grep - preview mode
 - [ ] git grep - regex
-- [ ] ability to configure grep algorithm (ex: ag)
-- [ ] grep buffer (open editors)
 
 ## Release Notes
 

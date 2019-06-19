@@ -20,7 +20,6 @@ const gitGrep = (query: string): Promise<QuickPickItem[]> => {
     "git",
     "grep",
     "-H",
-    "--cached",
     "-n",
     "-i",
     "-I",

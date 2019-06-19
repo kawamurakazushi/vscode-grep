@@ -1,8 +1,8 @@
 {
   "name": "vscode-grep",
-  "displayName": "vscode-grep",
-  "description": "",
-  "version": "0.1.1",
+  "displayName": "Incremental Grep",
+  "description": "Incremental grep extension. (git grep)",
+  "version": "0.1.2",
   "publisher": "kawamurakazushi",
   "engines": {
     "vscode": "^1.35.0"
