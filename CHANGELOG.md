@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2019-06-18
+### Added
+- Logo
+
 ## [0.1.2] - 2019-06-18
 ### Changed
 - Remove `--cached` from `git grep`.
