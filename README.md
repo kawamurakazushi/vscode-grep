@@ -1,4 +1,4 @@
-# vscode-grep README
+# vcode grep
 
 ## Features
 
