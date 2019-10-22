@@ -111,6 +111,10 @@ export function activate(context: ExtensionContext) {
       }
     });
 
+    quickPick.onDidChangeValue(async val => {
+      quickPick.items = await gitGrep(val);
+    });
+
     quickPick.show();
   });
 
