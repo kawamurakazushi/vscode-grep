@@ -93,7 +93,9 @@ export function activate(context: ExtensionContext) {
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = true;
     quickPick.placeholder = "Search";
-    quickPick.items = await gitGrep("");
+    gitGrep("").then(items => {
+      quickPick.items = items;
+    });
 
     quickPick.onDidAccept(async () => {
       if (quickPick.selectedItems.length > 0) {
