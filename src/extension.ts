@@ -14,9 +14,19 @@ import {
   TextDocumentShowOptions
 } from "vscode";
 
+type Cancel = () => void;
+class Cancellation {
+  cancel: Cancel = () => {};
+  token: Promise<void> = new Promise<void>((_, reject) => {
+    this.cancel = () => {
+      reject(new Error("Cancelled"));
+    };
+  });
+}
+
 const projectRoot = workspace.rootPath ? workspace.rootPath : ".";
 
-const gitGrep = (query: string): Promise<QuickPickItem[]> => {
+const gitGrep = (query: string, cancellationToken: Promise<void>): Promise<QuickPickItem[]> => {
   let command = quote([
     "git",
     "grep",
@@ -34,15 +44,14 @@ const gitGrep = (query: string): Promise<QuickPickItem[]> => {
     command = command.replace(/\"/g, '"""').replace(/\'/g, '"');
   }
 
-  return new Promise((resolve, _) => {
-    exec(
+  return new Promise((resolve, reject) => {
+    var proc = exec(
       command,
       { cwd: projectRoot, maxBuffer: 2000 * 1024 },
       (err, stdout, stderr) => {
-        // TODO: Refactor
         if (stderr) {
           window.showErrorMessage(stderr);
-          return resolve([]);
+          return reject(new Error(stderr));
         }
         const lines = stdout.split(/\n/).filter(l => l !== "");
         if (!lines.length) {
@@ -66,6 +75,10 @@ const gitGrep = (query: string): Promise<QuickPickItem[]> => {
         );
       }
     );
+    cancellationToken.catch(err => {
+      proc.kill();
+      return reject(err);
+    });
   });
 };
 
@@ -90,10 +103,10 @@ const showDocument = async (item: QuickPickItem, preserveFocus = false) => {
 export function activate(context: ExtensionContext) {
   let disposable = commands.registerCommand("grep.git", async () => {
     const quickPick = window.createQuickPick();
+    let cancellation = new Cancellation();
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = true;
     quickPick.placeholder = "Search";
-    quickPick.items = await gitGrep("");
 
     quickPick.onDidAccept(async () => {
       if (quickPick.selectedItems.length > 0) {
@@ -112,10 +125,15 @@ export function activate(context: ExtensionContext) {
     });
 
     quickPick.onDidChangeValue(async val => {
-      quickPick.items = await gitGrep(val);
+      if(cancellation) {
+        cancellation.cancel();
+      }
+      cancellation = new Cancellation();
+      quickPick.items = await gitGrep(val, cancellation.token);
     });
 
     quickPick.show();
+    quickPick.items = await gitGrep("", cancellation.token);
   });
 
   context.subscriptions.push(disposable);
