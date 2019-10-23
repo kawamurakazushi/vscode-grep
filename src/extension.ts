@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import { quote } from "shell-quote";
+import { type } from "os";
 import {
   workspace,
   commands,
@@ -16,16 +17,22 @@ import {
 const projectRoot = workspace.rootPath ? workspace.rootPath : ".";
 
 const gitGrep = (query: string): Promise<QuickPickItem[]> => {
-  const command = quote([
+  let command = quote([
     "git",
     "grep",
     "-H",
     "-n",
     "-i",
     "-I",
+    "--no-color",
     "-e",
     query === "" ? " " : query
   ]);
+
+  if (type() === "Windows_NT") {
+    // shell-quote doesn't work for cmd.exe
+    command = command.replace(/\"/g, '"""').replace(/\'/g, '"');
+  }
 
   return new Promise((resolve, _) => {
     exec(
