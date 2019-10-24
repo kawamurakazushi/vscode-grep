@@ -35,6 +35,7 @@ const gitGrep = (query: string, cancellationToken: Promise<void>): Promise<Quick
     "-i",
     "-I",
     "--no-color",
+    "-F",
     "-e",
     query === "" ? " " : query
   ]);
