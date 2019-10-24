@@ -25,6 +25,7 @@ const gitGrep = (query: string): Promise<QuickPickItem[]> => {
     "-i",
     "-I",
     "--no-color",
+    "-F",
     "-e",
     query === "" ? " " : query
   ]);
