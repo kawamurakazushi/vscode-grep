@@ -11,22 +11,14 @@ import {
   Position,
   Range,
   TextEditorRevealType,
-  TextDocumentShowOptions
+  TextDocumentShowOptions,
+  CancellationToken,
+  CancellationTokenSource
 } from "vscode";
-
-type Cancel = () => void;
-class Cancellation {
-  cancel: Cancel = () => {};
-  token: Promise<void> = new Promise<void>((_, reject) => {
-    this.cancel = () => {
-      reject(new Error("Cancelled"));
-    };
-  });
-}
 
 const projectRoot = workspace.rootPath ? workspace.rootPath : ".";
 
-const gitGrep = (query: string, cancellationToken: Promise<void>): Promise<QuickPickItem[]> => {
+const gitGrep = (query: string, cancellationToken: CancellationToken): Promise<QuickPickItem[]> => {
   let command = quote([
     "git",
     "grep",
@@ -76,9 +68,9 @@ const gitGrep = (query: string, cancellationToken: Promise<void>): Promise<Quick
         );
       }
     );
-    cancellationToken.catch(err => {
+    cancellationToken.onCancellationRequested(() => {
       proc.kill();
-      return reject(err);
+      return reject(new Error("Cancelled"));
     });
   });
 };
@@ -104,7 +96,7 @@ const showDocument = async (item: QuickPickItem, preserveFocus = false) => {
 export function activate(context: ExtensionContext) {
   let disposable = commands.registerCommand("grep.git", async () => {
     const quickPick = window.createQuickPick();
-    let cancellation = new Cancellation();
+    let cancellation = new CancellationTokenSource();
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = true;
     quickPick.placeholder = "Search";
@@ -129,7 +121,7 @@ export function activate(context: ExtensionContext) {
       if(cancellation) {
         cancellation.cancel();
       }
-      cancellation = new Cancellation();
+      cancellation = new CancellationTokenSource();
       quickPick.items = await gitGrep(val, cancellation.token);
     });
 
