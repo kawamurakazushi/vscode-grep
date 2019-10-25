@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for Windows.
 
 ### Changed
+- Call `git grep` as the user types to prevent QuickPick from falling back
+  to fuzzy matching by default.
 - Add `-F` to `git grep` since regex is currently unsupported.
 
 ## [0.1.3] - 2019-06-18
