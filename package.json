@@ -50,7 +50,7 @@
     "vscode": "^1.1.28"
   },
   "dependencies": {
-    "shell-quote": "^1.6.1"
+    "shell-quote": "^1.7.3"
   },
   "repository": {
     "type": "git",
